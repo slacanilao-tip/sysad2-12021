@@ -8,7 +8,7 @@
 
 #### B. How to create an Ansible Inventory
 - To create an Ansible inventory;
-	[<GROUPNAME>]
+	[GROUPNAME]
 	x.x.x.x <-- host's IP address
 
 #### C. How to create an Ad-hoc Ansible command with setup and shell module.  
