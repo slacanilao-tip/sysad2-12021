@@ -1,0 +1,7 @@
+---
+ - name: Install VSFTPD server for Ubuntu
+   hosts: Ubuntu
+
+   roles:
+     - Ubuntu_Install
+
