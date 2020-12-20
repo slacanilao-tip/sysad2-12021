@@ -1,0 +1,66 @@
+---
+ - name: Install apache
+   apt:
+     name: apache2
+     state: latest
+     update_cache: yes
+
+ - name: Allow through firewall
+   ufw:
+     rule: allow
+     direction: in
+     name: 'Apache'
+
+ - name: Create directory for website
+   file:
+     path: /var/www/quiz32
+     state: directory
+     owner: nobody
+     group: nogroup
+
+ - name: Create index.html file
+   copy: 
+     src: index.html
+     dest: /var/www/quiz32
+
+ - name: Configure file
+   become: yes
+   copy:
+     src: /etc/apache2/sites-available/000-default.conf
+     dest: /quiz32.conf
+     remote_src: yes
+
+ - name: Copy default file
+   copy:
+     src: /quiz32.conf
+     remote_src: yes
+     dest: /etc/apache2/sites-available
+
+ - name: Edit root file
+   replace:
+     path: /etc/apache2/sites-available/quiz32.conf
+     regexp: '/var/www/html'
+     replace: '/var/www/quiz32'
+
+ - name: Edit server name
+   replace:
+     path: /etc/apache2/sites-available/quiz32.conf
+     regexp: "#ServerName www.example.com"
+     replace: "#ServerName www.quiz32.com"
+ 
+ - name: Edit server admin
+   replace:
+     path: /etc/apache2/sites-available/quiz32.conf
+     regexp: "ServerAdmin webmaster@localhost"
+     replace: "ServerAdmin quiz32@slacanilao-tip.com"
+
+ - name: Activate VirtualHost
+   command: a2ensite quiz32.conf
+
+ - name: Reload apache
+   service:
+     name: apache2
+     state: reloaded
+
+
+# tasks file for roles/Ubuntu_Install
