@@ -1,0 +1,151 @@
+---
+# tasks file for roles/Nagios_Core
+ - name: Install required packages
+   apt:
+     name: 
+      - apache2
+      - build-essential
+      - libapache2-mod-php
+      - libgd-dev
+      - unzip
+     state: latest
+     update_cache: yes
+
+ - name: Install Nagios Core
+   get_url:
+     url: https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.5.tar.gz
+     dest: /tmp
+
+ - name: Install Nagios plugins
+   get_url:
+     url: https://nagios-plugins.org/download/nagios-plugins-2.3.3.tar.gz
+     dest: /tmp
+
+ - name: Extract Nagios Core
+   unarchive:
+     src: /tmp/nagios-4.4.5.tar.gz
+     dest: /tmp
+     remote_src: yes
+
+ - name: Extract Nagios Plugins
+   unarchive:
+     src: /tmp/nagios-plugins-2.3.3.tar.gz
+     dest: /tmp
+     remote_src: yes
+
+ - name: Creating nagios group
+   group:
+     name: nagios
+     state: present
+
+ - name: Creating nagios group2
+   group:
+     name: nagcmd
+     state: present
+
+ - name: Creating Nagios user
+   user:
+     name: nagios
+     shell: /bin/bash
+     comment: nagios user
+     group: nagios
+     password: $5$pCEYYX135seOipU4$kuDLQtabPN1TQgFRlIbl9PCXGrd...DWw5rSFMpGQKB
+
+ - name: Adding nagios user group for external command
+   user:
+     name: nagios
+     group: nagcmd
+     append: yes
+
+ - name: Add group
+   user:
+     name: www-data
+     group: nagcmd
+     append: yes
+
+ - name: Configuring Nagios Script
+   shell: ./configure --with-command-group=nagcmd --with-command-group=nagcmd --with-httpd_conf=/etc/apache2/sites-enabled/
+   args:
+    chdir: /tmp/nagios-4.4.5
+
+ - name: Configure Nagios Plugins
+   shell: ./configure --with-nagios-user=nagios --with-nagios-group=nagios
+   args:
+     chdir: /tmp/nagios-plugins-2.3.3
+
+
+ - name: Compiling plugins
+   make:
+     chdir: /tmp/nagios-plugins-2.3.3
+
+ - name: Install plugins
+   make:
+     chdir: /tmp/nagios-plugins-2.3.3
+     target: install 
+
+ - name: Compile nagios files
+   make: 
+    chdir: /tmp/nagios-4.4.5
+    target: all
+
+ - name: Install binaries
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install
+
+ - name: Creating External Command directory
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-commandmode 
+   become: yes
+
+ - name: Install Nagios Config. files
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-config
+   become: yes
+
+ - name: Apache config. files
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-webconf
+   become: yes
+
+ - name: Create systemd unit file
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-daemoninit
+   become: yes
+
+ - name: Python3
+   apt:
+     name: python-pkg-resources
+     state: latest
+
+ - name: Htpasswd module
+   pip:
+     name: passlib
+     state:  latest
+
+ - name: Creating user account
+   htpasswd:
+     path: /usr/local/nagios/etc/htpasswd.users 
+     name: samuel
+     password: '12345'
+     crypt_scheme: md5_crypt
+
+ - name: restart apache service
+   service:
+     name: apache2
+     state: reloaded
+
+ - name: Starting Nagios
+   service:
+    name: nagios
+    state: started
+
+
+
+
+
+
