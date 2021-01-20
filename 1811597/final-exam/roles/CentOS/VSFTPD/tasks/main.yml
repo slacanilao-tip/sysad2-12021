@@ -1,0 +1,45 @@
+---
+# tasks file for roles/CentOS/VSFTPD
+ - name: Install vsftpd
+   yum:
+     name: vsftpd
+     state: latest
+     update_cache: yes
+
+ - name: Start ftp server
+   service:
+     name: vsftpd
+     state: started
+     enabled: yes
+
+ - name: Create ftp user
+   user:
+     name: '{{ ftp_user }}'
+     password: '{{ ftp_pass }}'
+     comment: "FTP user"
+
+ - name: Add DenyUser
+   lineinfile:
+     path: /etc/ssh/sshd_config
+     line: "DenyUsers '{{ ftp_user }}'"
+   register: sshd_config
+
+ - name: Restart SSHD service
+   service:
+     name: sshd
+     state: restarted
+   when: sshd_config.changed
+
+ - name: Copy vsftpd conf
+   copy:
+     src: vsftpd.conf
+     dest: /etc/vsftpd.conf
+   register: vsftpd_config
+
+ - name: Restard VSFTPD
+   service:
+     name: vsftpd
+     state: restarted
+   when: vsftpd_config.changed
+
+

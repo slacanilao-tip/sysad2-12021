@@ -1,0 +1,134 @@
+---
+# task file for CentOS/Nagios
+ 
+ - name: Download required packages
+   yum:
+     name:
+       - httpd
+       - gcc
+       - glibc
+       - glibc-common
+       - perl
+       - gd-devel
+       - postfix
+       - unzip
+     state: present
+     update_cache: yes
+
+ - name: Start httpd
+   service:
+     name: httpd
+     state: started
+
+ - name: Download Nagios Core
+   get_url:
+     url: https://assets.nagios.com/downloads/nagioscore/releases/nagios-4.4.5.tar.gz
+     dest: /tmp
+
+ - name: Extract Nagios Core
+   unarchive:
+     src: /tmp/nagios-4.4.5.tar.gz
+     dest: /tmp
+     remote_src: yes
+
+ - name: Create nagios group
+   group:
+     name: nagios
+     state: present
+
+ - name: Add group
+   become: yes
+   group:
+     name: nagcmd
+     state: present
+
+ - name: Add user 
+   become: yes
+   user:
+     name: nagios
+     shell: /bin/bash
+     comment: nagios user
+     group: nagios
+     password: '{{ naguser_pass }}'
+
+ - name: Create virtual host dir
+   become: yes
+   file:
+     path: /etc/httpd/conf.d
+     state: directory
+
+ - name: Configure nagios
+   become: yes
+   command: ./configure --with-command-group=nagcmd
+   args:
+     chdir: /tmp/nagios-4.4.5
+
+ - name: Compile Nagios core
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: all
+
+ - name: Install Nagios binaries
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install
+
+ 
+ - name: Add httpd to nagios group
+   user:
+     name: apache
+     groups: nagios
+     append: yes
+
+ - name: Add nagios user to nagcmd
+   user:
+     name: nagios
+     group: nagcmd
+     append: yes
+
+
+ - name: Create systemd unit file
+   become: yes
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-daemoninit
+
+ - name: Install set permissions
+   become: yes
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-commandmode
+
+ - name: Apache config. files
+   make:
+     chdir: /tmp/nagios-4.4.5
+     target: install-webconf
+   become: yes
+
+ - name: Install python
+   become: yes
+   yum:
+     name: python3-pip
+     state: latest
+     update_cache: yes
+
+ - name: Htpasswd module
+   pip:
+     name: passlib
+     state: latest
+
+ - name: Create nagios admin
+   become: yes
+   htpasswd:
+     path: /usr/local/nagios/etc/htpasswd.users
+     name: nagiosadmin
+     password: '{{ nagadmin_pass }}'
+
+ - name: Restart httpd
+   become: yes
+   service:
+     name: httpd
+     state: restarted
+
+
+

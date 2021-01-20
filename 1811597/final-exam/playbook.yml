@@ -1,0 +1,27 @@
+---
+ - name: Install for Ubuntu
+   hosts: Ubuntu
+   vars_files: config.yml
+   roles:
+     - Ubuntu/Nagios
+     - Ubuntu/VSFTPD
+     - Ubuntu/prelim-clone
+
+ - name: Install for CentOS
+   hosts: CentOS
+   vars_files: config.yml
+   roles:
+     - CentOS/Nagios
+     - CentOS/VSFTPD
+     - CentOS/prelim-clone
+
+
+ - name: Install for openSUSE
+   hosts: openSUSE
+   vars_files: config.yml
+   roles:
+     - openSUSE/Nagios
+     - openSUSE/VSFTPD
+     - openSUSE/prelim-clone
+
+

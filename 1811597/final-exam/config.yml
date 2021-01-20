@@ -1,0 +1,9 @@
+prelim_clone: https://github.com/slacanilao-tip/sysad2-12021.git
+username: slacanilao-tip
+
+ftp_user: ftp_user
+ftp_pass: $6$pp4K2Ca2zzX68AUF$ifJ3yZDbhM8oDAyO7zRUUpXmIkleeFZqaCB4LPflJORKde9W9KJo7Vn3mg42CcDl48dg.217aeVVcL65KOxnU0
+
+nag_user: nagios
+nagadmin_pass: $6$D63tD7dgFryItIon$W.t9VJvrCE0UePaOIJkoFJ8WrRwAMXxoSUBLya0C9kENPPJRukxlnHS2a/QstTiNEzlxS2fNtMviFOyds4Ss3. 
+naguser_pass: $5$gyc9dJSFuWfpC8PU$z1neg5VtNLRexa2ETzlIWSXdpclA19dikZjSHCiifu6 

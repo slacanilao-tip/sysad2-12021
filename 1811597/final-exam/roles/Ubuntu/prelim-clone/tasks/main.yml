@@ -1,0 +1,13 @@
+---
+# tasks file for roles/Ubuntu/prelim-clone
+ - name: Install pre-requisite for git
+   apt:
+     name: git
+     state: latest
+
+ - name: Clone prelim repo
+   git:
+     repo: '{{ prelim_clone }}'
+     dest: ./prelim-exam
+     version: prelim-exam
+

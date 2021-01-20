@@ -1,0 +1,14 @@
+---
+# tasks file for roles/CentOS/prelim-clone
+ - name: Install pre-requisites for git
+   yum:
+     name: git
+     state: present
+  
+
+ - name: Clone prelim repository
+   git:
+     repo: '{{ prelim_clone }}'
+     dest: /etc/githubrepo
+     version: prelim-exam
+

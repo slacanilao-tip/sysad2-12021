@@ -1,0 +1,136 @@
+---
+# tasks file for roles/openSUSE/Nagios
+ - name: Install dependencies
+   zypper:
+     name:
+       - httpd
+       - apache2
+       - gcc
+       - glibc
+       - gd
+       - perl
+       - php7
+       - apache2-mod_php7
+       - unzip
+       - make
+       - nagios
+     state: latest
+
+ - name: Enable php7
+   shell: 'a2enmod php7'
+
+ - name: Create nagios group
+   group:
+     name: nagios
+     state: present
+
+ - name: Add nagcmd
+   group:
+     name: nagcmd
+     state: present
+
+ - name: Add nagadmin
+   group:
+     name: nagadmin
+     state: present
+
+ - name: Add nagios user
+   user:
+     name: nagios
+     comment: nagios user
+     group: nagadmin
+
+ - name: Add wwwrun user for external command
+   user:
+     name: wwwrun
+     group: nagadmin
+     append: yes
+
+ - name: Create directory
+   file:
+     path: /downloads
+     state: directory
+
+ - name: Download nagios
+   get_url:
+     url: http://prdownloads.sourceforge.net/sourceforge/nagios/nagios-4.2.1.tar.gz      
+     dest: /downloads
+
+ - name: Extract Nagios
+   unarchive:
+     src: /downloads/nagios-4.2.1.tar.gz
+     dest: /downloads
+     remote_src: yes
+
+ - name: Create virtual host
+   file:
+     path: /etc/httpd/conf.d
+     state: directory
+
+ - name: Configuring Nagios Script
+   command: ./configure --with-command-group=nagcmd --with-command-group=nagcmd --with-httpd_conf=/etc/httpd/conf.d
+   args:
+     chdir: /downloads/nagios-4.2.1
+
+ - name: Clean nagios directory
+   make:
+     chdir: /downloads/nagios-4.2.1
+     target: clean
+
+ - name: Install init script
+   make:
+     chdir: /downloads/nagios-4.2.1
+     target: install-init
+
+ - name: Install config files
+   make:
+     chdir: /downloads/nagios-4.2.1
+     target: install-config
+
+ - name: Install nagios set permissions
+   make:
+     chdir: /downloads/nagios-4.2.1
+     target: install-commandmode
+
+ - name: Install nagios webconf
+   make:
+     chdir: /downloads/nagios-4.2.1
+     target: install-webconf
+
+ - name: Install python
+   zypper:
+     name: python3-pip
+     state: latest
+
+ - name: Install htpasswd module
+   pip:
+     name: passlib
+     state: latest
+
+ - name: Create nagiosadmin account
+   htpasswd:
+     path: /usr/local/nagios/etc/htpasswd.users
+     name: nagiosadmin
+     password: '{{ nagadmin_pass }}'
+     crypt_scheme: md5_crypt
+
+ - name: Restart apache
+   service:
+     name: apache2
+     state: reloaded
+
+ - name: Start nagios service
+   become: yes
+   service:
+     name: nagios
+     state: started
+
+
+
+
+
+
+
+
+
+
