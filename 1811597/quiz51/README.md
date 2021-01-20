@@ -1,3 +1,4 @@
+```
 .
 ├── Inventory
 ├── README.md
@@ -24,3 +25,4 @@
                 └── main.yml
 
 11 directories, 12 files
+```
